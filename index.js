@@ -1,6 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
 import validateEmailAndUsername from "./middleware/validateEmailAndUsername.js";
 import checkPasswordStrength from './middleware/checkPasswordStrength.js';
@@ -11,18 +12,21 @@ const { PrismaClient } = pkg;
 
 const app = express();
 const client = new PrismaClient();
+app.use(cookieParser());
+
 
 app.use(express.json());
 app.use(cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true
 }))
 
 app.post("/auth/signup", [validateEmailAndUsername, checkPasswordStrength], async (req, res) => {
     const { firstName, lastName, emailAddress, username, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 12);
     try {
-        const newUser = await client.User.create({
+        const newUser = await client.user.create({
             data: {
                 firstName,
                 lastName,
@@ -49,7 +53,7 @@ app.post("/auth/login", async (req, res) => {
             return res.status(401).json({ message: "Wrong login credentials."});
         }
         const isMatch = await bcrypt.compare(password, user.password);
-        console.log(isMatch)
+        console.log("password match", isMatch)
         if (!isMatch) {
             return res.status(401).json({ message: "Wrong login credentials."});
         }
@@ -59,7 +63,11 @@ app.post("/auth/login", async (req, res) => {
             lastName: user.lastName,
         }
         const token = jwt.sign(jwtPayload, process.env.JWT_SECRET_KEY);
-        res.status(200).cookie("blogitAuthToken", token, {}).json({
+        res.status(200).cookie("blogitAuthToken", token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax'
+        }).json({
             firstName: user.firstName,
             lastName: user.lastName,
             emailAddress: user.emailAddress,
