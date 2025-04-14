@@ -24,6 +24,12 @@ model User {
   updatedAt     DateTime @updatedAt @map("updated_at")
   isDeleted     Boolean  @default(false) @map("is_deleted")
   isDeactivated Boolean  @default(false) @map("is_deactivated")
+  phoneNumber     String?  @map("phone_number")
+  occupation      String?  @map("occupation")
+  bio             String?  @map("bio")
+  status          String?  @map("status")
+  secondaryEmail  String?  @map("secondary_email")
+  profilePhoto    String?  @map("profile_photo")
 
   @@map("users")
 }

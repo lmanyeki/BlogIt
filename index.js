@@ -78,6 +78,38 @@ app.post("/auth/login", async (req, res) => {
     }
 })
 
+app.put('/user/:id/profile', async (req, res) => {
+    const { id } = req.params;
+    const {
+      phoneNumber,
+      occupation,
+      bio,
+      status,
+      secondaryEmail,
+      profilePhoto
+    } = req.body;
+  
+    try {
+      const updatedUser = await client.user.update({
+        where: { id },
+        data: {
+          phoneNumber,
+          occupation,
+          bio,
+          status,
+          secondaryEmail,
+          profilePhoto,
+        },
+      });
+  
+      res.json({ message: "Profile updated successfully", updatedUser });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+  
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server running on port ${port} `)
