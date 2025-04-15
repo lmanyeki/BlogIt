@@ -30,6 +30,22 @@ model User {
   status          String?  @map("status")
   secondaryEmail  String?  @map("secondary_email")
   profilePhoto    String?  @map("profile_photo")
+  blogs Blog[]
 
   @@map("users")
+}
+
+model Blog {
+  id             String   @id @default(uuid())
+  title          String  @map("title")
+  excerpt        String  @map("excerpt")
+  body           String @map("body")
+  featuredImage  String @map("featured_image")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  author         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+
+  @@map("blogs")
 }

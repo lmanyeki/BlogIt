@@ -3,7 +3,6 @@ const client = new PrismaClient;
 
 async function validateEmailAndUsername(req, res, next) {
     const {emailAddress, username } = req.body;
-    res.send({ emailAddress, username });
     try {
         const userWithEmail = await client.user.findFirst({
             where: { emailAddress }
