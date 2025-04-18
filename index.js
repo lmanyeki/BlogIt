@@ -17,6 +17,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(cors({
     origin: "http://localhost:5173",
+        "https://blog-it-frontend-chi.vercel.app/signup",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true
 }));
