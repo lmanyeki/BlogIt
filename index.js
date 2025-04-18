@@ -1,14 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
 import authRoutes from "./routes/authRoutes.js";
-import blogRoutes from "./routes/blogs.js";
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import blogRoutes from "./routes/blogRoutes.js";
+import morgan from 'morgan';
+import profileRoutes from './routes/profileRoutes.js';
 
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-const client = new PrismaClient();
 app.use(cookieParser());
 app.use(express.json());
 app.use(cors({
@@ -16,44 +20,18 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true
 }));
+app.use(morgan('dev'));
+app.use(express.urlencoded({ extended: true }));
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use("/auth", authRoutes);
 app.use("/blogs", blogRoutes);
-
-
-app.put('/user/:id/profile', async (req, res) => {
-    const { id } = req.params;
-    const {
-      phoneNumber,
-      occupation,
-      bio,
-      status,
-      secondaryEmail,
-      profilePhoto
-    } = req.body;
-  
-    try {
-      const updatedUser = await client.user.update({
-        where: { id },
-        data: {
-          phoneNumber,
-          occupation,
-          bio,
-          status,
-          secondaryEmail,
-          profilePhoto,
-        },
-      });
-  
-      res.json({ message: "Profile updated successfully", updatedUser });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Failed to update profile" });
-    }
-  });
-  
+app.use('/api/profile', profileRoutes);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server running on port ${port} `)
 })
+
+export default app;
